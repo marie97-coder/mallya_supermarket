@@ -4,20 +4,20 @@ A comprehensive Spring Boot application for managing supermarket inventory, poin
 
 ## Features
 
-### 🛒 Point of Sale (POS)
+###  Point of Sale (POS)
 - **Barcode Scanning**: Fast product lookup via barcode
 - **Stock Validation**: Prevents sales of out-of-stock items
 - **Expiration Blocking**: Stops sale of expired products
 - **Transaction Processing**: Complete sales with tax calculation
 - **Receipt Generation**: Automatic receipt creation
 
-### 📦 Smart Inventory Management
+###  Smart Inventory Management
 - **Automated Expiration Tracking**: Midnight scheduled tasks update expired status
 - **Visual Alerts**: Dashboard notifications for products expiring within 30 days
 - **Low Stock Monitoring**: Configurable thresholds for reorder alerts
 - **Category Management**: Organized product categorization
 
-### 📊 Reporting & Analytics
+###  Reporting & Analytics
 - **Revenue Reports**: Daily and monthly income tracking
 - **Wastage Reports**: Loss calculation from expired products
 - **Low Stock Reports**: Items needing immediate reorder
@@ -144,11 +144,11 @@ The application is configured with:
 ## Development Notes
 
 ### Key Features Implemented
-1. ✅ **Expiration Management**: Automated tracking and alerts
-2. ✅ **POS Workflow**: Complete barcode-based sales process
-3. ✅ **Dashboard**: Real-time metrics and reporting
-4. ✅ **Database Schema**: Proper entity relationships
-5. ✅ **Sample Data**: Automatic initialization for testing
+1.  **Expiration Management**: Automated tracking and alerts
+2.  **POS Workflow**: Complete barcode-based sales process
+3.  **Dashboard**: Real-time metrics and reporting
+4.  **Database Schema**: Proper entity relationships
+5.  **Sample Data**: Automatic initialization for testing
 
 ### Architecture Highlights
 - **Service Layer**: Business logic separated from controllers
