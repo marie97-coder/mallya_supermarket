@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mallya Supermarket</title>
+
+  <style th:inline="css">
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap");
+
+    :root{
+      --ink:#1f1f1f;
+      --muted:#6b6b6b;
+      --accent:#0d6efd;
+      --card-shadow:0 10px 22px rgba(0,0,0,0.08);
+    }
+
+    body{
+      margin:0;
+      font-family:"Montserrat","Segoe UI",sans-serif;
+      background:#f4f6fa;
+      color:var(--ink);
+    }
+
+    .topbar{
+      background:#ffffff;
+      border-bottom:1px solid #eaeaea;
+      position:sticky;
+      top:0;
+    }
+
+    .topbar-inner{
+      max-width:1100px;
+      margin:auto;
+      padding:14px 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .logo{
+      background:#0d6efd;
+      color:white;
+      padding:8px 14px;
+      border-radius:6px;
+      font-weight:700;
+    }
+
+    .nav-links a{
+      margin-left:16px;
+      color:var(--muted);
+    }
+
+    .nav-links a:hover{
+      color:var(--ink);
+    }
+
+    .hero{
+      min-height:420px;
+      background:
+              linear-gradient(rgba(0,0,0,0.00),rgba(0,0,0,0.20)),
+              url("[[@{/images/png1.jpg}]]");
+      background-size:cover;
+      background-position:center;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:60px 20px;
+    }
+
+    .hero-card{
+      background:rgba(0,0,0,0.55);
+      color:white;
+      padding:32px 36px;
+      border-radius:12px;
+      max-width:520px;
+    }
+
+    .hero-card h1{
+      font-size:2.5rem;
+      margin-bottom:10px;
+    }
+
+    .hero-card p{
+      color:#e2e2e2;
+    }
+
+    .login-btn{
+      margin-top:18px;
+      display:inline-block;
+      padding:12px 26px;
+      background:var(--accent);
+      color:white;
+      border-radius:6px;
+      font-weight:600;
+    }
+
+    .section{
+      max-width:1100px;
+      margin:auto;
+      padding:50px 20px;
+      text-align:center;
+    }
+
+    .section span{
+      color:var(--accent);
+      font-weight:600;
+    }
+
+    .section h2{
+      margin-top:8px;
+    }
+
+    .card-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+      gap:18px;
+      margin-top:25px;
+    }
+
+    .card{
+      background:white;
+      border-radius:14px;
+      padding:24px;
+      box-shadow:var(--card-shadow);
+    }
+
+    .card-icon{
+      font-size:32px;
+      color:var(--accent);
+      margin-bottom:10px;
+    }
+
+    .footer{
+      background:#111;
+      color:white;
+      text-align:center;
+      padding:16px;
+      margin-top:40px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">MALLYA</div>
+    <nav class="nav-links">
+      <a href="/login">Login</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-card">
+    <h1>Mallya Supermarket System</h1>
+    <p>
+      Manage products, sales, stock, and reports easily with a professional POS system.
+    </p>
+    <a href="/login" class="login-btn">Login to System</a>
+  </div>
+</section>
+
+<section class="section">
+  <span>Supermarket Features</span>
+  <h2>Our Management Modules</h2>
+
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-icon">🛒</div>
+      <h3>Point of Sale</h3>
+      <p>Fast cashier checkout, receipts printing, and payment tracking.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Product Management</h3>
+      <p>Add, edit, and manage supermarket products and prices easily.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Sales Reports</h3>
+      <p>Daily, weekly, and monthly sales reports for business decisions.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">⚠️</div>
+      <h3>Stock Control</h3>
+      <p>Track stock levels, low-stock alerts, and product expiry dates.</p>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  MALLYA Supermarket System © All Rights Reserved
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Sales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .home-topbar {
+            background: #ffffff;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .home-topbar-inner {
+            max-width: 1100px;
+            margin: auto;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-topbar-logo {
+            background: #0d6efd;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .home-topbar-links a {
+            margin-left: 16px;
+            color: #6b6b6b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .home-topbar-links a:hover {
+            color: #1f1f1f;
+        }
+        body { background: #f5f7fb; }
+        .nav-link.active {
+            font-weight: 600;
+            color: #fff !important;
+            text-decoration: underline;
+            text-underline-offset: 0.35rem;
+        }
+    </style>
+</head>
+<body>
+<header class="home-topbar">
+    <div class="home-topbar-inner">
+        <a class="home-topbar-logo" href="/">MALLYA</a>
+        <nav class="home-topbar-links">
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+        </nav>
+    </div>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid px-lg-4">
+        <a class="navbar-brand fw-semibold" href="/admin/dashboard">
+            <i class="bi bi-shop me-2"></i>Sales Management
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav" aria-controls="adminNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'products'} ? ' active'" href="/admin/products">View Products</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'add-product'} ? ' active'" href="/admin/products/new">Add Product</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'sales'} ? ' active'" href="/admin/sales">View Sales</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/record-sale">Record Sale</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'reports'} ? ' active'" href="/admin/reports">Report</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'add-employee'} ? ' active'" href="/admin/employees/new">Add Employee</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'employees'} ? ' active'" href="/admin/employees">View Employee</a></li>
+            </ul>
+            <form th:action="@{/logout}" method="post" class="mb-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Recent Sales</h2>
+                <button class="btn btn-dark" type="button" onclick="loadSales()">
+                    <i class="bi bi-arrow-repeat me-1"></i>Refresh Sales
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Sale ID</th>
+                        <th>Time</th>
+                        <th>Cashier</th>
+                        <th>Items</th>
+                        <th>Payment</th>
+                        <th>Reference</th>
+                        <th>Total</th>
+                        <th>Profit</th>
+                        <th>Amount Received</th>
+                        <th>Change</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="rows">
+                    <tr><td colspan="11">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="msg" class="mt-3"></div>
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="editSaleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <form id="editSaleForm">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Sale</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input id="sale-id" type="hidden">
+                    <div id="sale-edit-msg" class="mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="sale-time" class="form-label">Time</label>
+                            <input id="sale-time" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sale-cashier" class="form-label">Cashier</label>
+                            <input id="sale-cashier" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sale-total" class="form-label">Total (TZS)</label>
+                            <input id="sale-total" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sale-payment" class="form-label">Payment Method</label>
+                            <select id="sale-payment" class="form-select" required>
+                                <option value="CASH">Cash</option>
+                                <option value="MOBILE_MONEY">Mobile Money</option>
+                                <option value="CARD">Card</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sale-amount" class="form-label">Amount Received (TZS)</label>
+                            <input id="sale-amount" type="number" min="0" step="0.01" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sale-change" class="form-label">Change (TZS)</label>
+                            <input id="sale-change" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sale-reference" class="form-label">Transaction Reference</label>
+                            <input id="sale-reference" class="form-control" placeholder="Required for Mobile Money/Card">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="mb-2"><i class="bi bi-list-ul me-1"></i>Sale Items</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle mb-0">
+                            <thead class="table-secondary">
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Line Total</th>
+                            </tr>
+                            </thead>
+                            <tbody id="sale-items-rows">
+                            <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Update Sale
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let saleEditorModal;
+    let selectedSaleTotal = 0;
+
+    async function parseResponse(response) {
+        const type = response.headers.get("content-type") || "";
+        if (type.includes("application/json")) return response.json();
+        return response.text();
+    }
+
+    function money(value) {
+        const number = Number(value || 0);
+        return "TSh " + number.toFixed(2);
+    }
+
+    function showError(text) {
+        const msg = document.getElementById("msg");
+        msg.innerHTML = `<div class="alert alert-danger mb-0">${text}</div>`;
+    }
+
+    function showSuccess(text) {
+        const msg = document.getElementById("msg");
+        msg.innerHTML = `<div class="alert alert-success mb-0">${text}</div>`;
+    }
+
+    function showSaleEditMessage(text, ok) {
+        const msg = document.getElementById("sale-edit-msg");
+        if (!text) {
+            msg.innerHTML = "";
+            return;
+        }
+        msg.innerHTML = `<div class="alert ${ok ? "alert-success" : "alert-danger"} mb-0">${text}</div>`;
+    }
+
+    function formatPaymentMethod(value) {
+        const normalized = String(value || "").toUpperCase();
+        if (normalized === "MOBILE_MONEY") return "Mobile Money";
+        if (normalized === "CARD") return "Card";
+        if (normalized === "CASH") return "Cash";
+        return "-";
+    }
+
+    function formatTimestamp(value) {
+        if (!value) return "-";
+        return String(value).replace("T", " ");
+    }
+
+    async function loadSales() {
+        try {
+            const response = await fetch("/api/admin/sales?limit=50");
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof data === "string" ? data : "Failed to load sales");
+
+            const rows = document.getElementById("rows");
+            if (!Array.isArray(data) || data.length === 0) {
+                rows.innerHTML = "<tr><td colspan='11'>No sales found</td></tr>";
+                return;
+            }
+
+            rows.innerHTML = data.map(sale => `
+                <tr>
+                    <td>${sale.id}</td>
+                    <td>${formatTimestamp(sale.timestamp)}</td>
+                    <td>${sale.cashier}</td>
+                    <td>${sale.itemCount || 0}</td>
+                    <td>${formatPaymentMethod(sale.paymentMethod)}</td>
+                    <td>${sale.transactionReference || "-"}</td>
+                    <td>${money(sale.totalPrice)}</td>
+                    <td class="${Number(sale.profit || 0) >= 0 ? "text-success fw-semibold" : "text-danger fw-semibold"}">${money(sale.profit)}</td>
+                    <td>${money(sale.amountReceived)}</td>
+                    <td>${money(sale.changeAmount)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" type="button" onclick="openSaleEditor(${sale.id})">
+                            <i class="bi bi-pencil-square me-1"></i>Update
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    function recalculateChange() {
+        const amountReceived = Number(document.getElementById("sale-amount").value || 0);
+        const change = amountReceived - selectedSaleTotal;
+        document.getElementById("sale-change").value = money(change);
+    }
+
+    async function openSaleEditor(saleId) {
+        try {
+            showSaleEditMessage("", true);
+            const response = await fetch("/api/admin/sales/" + saleId);
+            const sale = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof sale === "string" ? sale : "Failed to load sale details");
+
+            document.getElementById("sale-id").value = sale.id;
+            document.getElementById("sale-time").value = formatTimestamp(sale.timestamp);
+            document.getElementById("sale-cashier").value = sale.cashier || "-";
+            document.getElementById("sale-total").value = money(sale.totalPrice);
+            document.getElementById("sale-payment").value = sale.paymentMethod || "CASH";
+            document.getElementById("sale-amount").value = Number(sale.amountReceived || 0);
+            document.getElementById("sale-reference").value = sale.transactionReference || "";
+
+            selectedSaleTotal = Number(sale.totalPrice || 0);
+            recalculateChange();
+
+            const itemRows = document.getElementById("sale-items-rows");
+            if (!Array.isArray(sale.items) || sale.items.length === 0) {
+                itemRows.innerHTML = "<tr><td colspan='5'>No items found</td></tr>";
+            } else {
+                itemRows.innerHTML = sale.items.map(item => `
+                    <tr>
+                        <td>${item.barcode || "-"}</td>
+                        <td>${item.productName || "-"}</td>
+                        <td>${item.quantity || 0}</td>
+                        <td>${money(item.priceAtSale)}</td>
+                        <td>${money(item.lineTotal)}</td>
+                    </tr>
+                `).join("");
+            }
+
+            if (saleEditorModal) {
+                saleEditorModal.show();
+            } else {
+                showError("Update dialog failed to initialize. Please refresh page.");
+            }
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    async function submitSaleUpdate(event) {
+        event.preventDefault();
+
+        const saleId = document.getElementById("sale-id").value;
+        const paymentMethod = document.getElementById("sale-payment").value;
+        const amountReceived = Number(document.getElementById("sale-amount").value || 0);
+        const transactionReference = document.getElementById("sale-reference").value.trim();
+
+        if (amountReceived < selectedSaleTotal) {
+            showSaleEditMessage("Amount received must be greater than or equal to total", false);
+            return;
+        }
+        if ((paymentMethod === "MOBILE_MONEY" || paymentMethod === "CARD") && !transactionReference) {
+            showSaleEditMessage("Transaction reference is required for Mobile Money and Card", false);
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/admin/sales/" + encodeURIComponent(saleId), {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paymentMethod: paymentMethod,
+                    amountReceived: amountReceived,
+                    transactionReference: transactionReference
+                })
+            });
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof data === "string" ? data : "Failed to update sale");
+
+            showSaleEditMessage("Sale updated successfully", true);
+            if (saleEditorModal) {
+                saleEditorModal.hide();
+            }
+            showSuccess("Sale updated successfully");
+            await loadSales();
+        } catch (error) {
+            showSaleEditMessage(error.message, false);
+        }
+    }
+
+    window.onload = function () {
+        if (window.bootstrap && bootstrap.Modal) {
+            saleEditorModal = new bootstrap.Modal(document.getElementById("editSaleModal"));
+        } else {
+            saleEditorModal = null;
+        }
+        document.getElementById("editSaleForm").addEventListener("submit", submitSaleUpdate);
+        document.getElementById("sale-amount").addEventListener("input", recalculateChange);
+        loadSales();
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

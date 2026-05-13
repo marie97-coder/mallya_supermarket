@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mallya Supermarket - Dashboard</title>
+    <style>
+        .home-topbar {
+            background: #ffffff;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .home-topbar-inner {
+            max-width: 1100px;
+            margin: auto;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-topbar-logo {
+            background: #0d6efd;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .home-topbar-links a {
+            margin-left: 16px;
+            color: #6b6b6b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .home-topbar-links a:hover {
+            color: #1f1f1f;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .user-panel form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 6px;
+            padding: 0.45rem 0.85rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-card.revenue { border-left: 4px solid #4CAF50; }
+        .stat-card.sales { border-left: 4px solid #2196F3; }
+        .stat-card.wastage { border-left: 4px solid #f44336; }
+        .stat-card.low-stock { border-left: 4px solid #FF9800; }
+        
+        .section {
+            background: white;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .section-header h2 {
+            color: #495057;
+            font-size: 1.25rem;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        .pos-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .scan-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .scan-form input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .scan-form button {
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+        
+        .scan-form button:hover {
+            background: #5a6fd8;
+        }
+        
+        .product-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<header class="home-topbar">
+    <div class="home-topbar-inner">
+        <a class="home-topbar-logo" href="/">MALLYA</a>
+        <nav class="home-topbar-links">
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+        </nav>
+    </div>
+</header>
+
+    <div class="header">
+        <div class="header-content">
+            <h1>Mallya Supermarket Management System</h1>
+            <div class="user-panel">
+                <span>Signed in as <strong th:text="${username}">user</strong></span>
+                <form th:action="@{/logout}" method="post">
+                    <button class="logout-btn" type="submit">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Dashboard Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card revenue">
+                <h3>Daily Revenue</h3>
+                <div class="value" id="dailyRevenue">TSh 0.00</div>
+            </div>
+            <div class="stat-card sales">
+                <h3>Daily Sales</h3>
+                <div class="value" id="dailySales">0</div>
+            </div>
+            <div class="stat-card wastage">
+                <h3>Wastage Value</h3>
+                <div class="value" id="wastageValue">TSh 0.00</div>
+            </div>
+            <div class="stat-card low-stock">
+                <h3>Low Stock Items</h3>
+                <div class="value" id="lowStockCount">0</div>
+            </div>
+        </div>
+        
+        <!-- Point of Sale Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Point of Sale</h2>
+            </div>
+            <div class="section-content">
+                <div class="pos-section">
+                    <div>
+                        <h3>Scan Product</h3>
+                        <div class="scan-form">
+                            <input type="text" id="barcodeInput" placeholder="Enter barcode..." />
+                            <button onclick="scanProduct()">Scan</button>
+                        </div>
+                        <div id="scanResult"></div>
+                        
+                        <h3 style="margin-top: 2rem;">Quick Sale</h3>
+                        <div class="scan-form">
+                            <input type="text" id="saleBarcode" placeholder="Barcode..." />
+                            <input type="number" id="saleQuantity" placeholder="Quantity..." min="1" value="1" />
+                            <button onclick="addToCart()">Add to Cart</button>
+                        </div>
+                        <div id="cartItems"></div>
+                        <button class="btn btn-primary" onclick="completeSale()" style="margin-top: 1rem;">Complete Sale</button>
+                        <div id="saleResult"></div>
+                    </div>
+                    
+                    <div>
+                        <h3>Inventory Alerts</h3>
+                        <div id="inventoryAlerts"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reports Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>Reports</h2>
+            </div>
+            <div class="section-content">
+                <button class="btn btn-primary" onclick="loadReport('daily')">Daily Report</button>
+                <button class="btn btn-primary" onclick="loadReport('monthly')">Monthly Report</button>
+                <button class="btn btn-primary" onclick="loadReport('wastage')">Wastage Report</button>
+                <button class="btn btn-primary" onclick="loadReport('lowstock')">Low Stock Report</button>
+                
+                <div id="reportContent" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        let cart = [];
+        const currentCashier = /*[[${username}]]*/ 'admin';
+        
+        // Load dashboard data on page load
+        window.onload = function() {
+            loadDashboardData();
+            loadInventoryAlerts();
+        };
+        
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/reports/dashboard');
+                const data = await response.json();
+                
+                document.getElementById('dailyRevenue').textContent = 'TSh ' + (data.dailyRevenue || 0).toFixed(2);
+                document.getElementById('dailySales').textContent = data.dailySales || 0;
+                document.getElementById('wastageValue').textContent = 'TSh ' + (data.totalWastage || 0).toFixed(2);
+                document.getElementById('lowStockCount').textContent = data.lowStockCount || 0;
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+        
+        async function scanProduct() {
+            const barcode = document.getElementById('barcodeInput').value.trim();
+            if (!barcode) {
+                showResult('scanResult', 'Please enter a barcode', 'danger');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/pos/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ barcode })
+                });
+                
+                if (response.ok) {
+                    const product = await response.json();
+                    showProductInfo('scanResult', product);
+                } else {
+                    const error = await response.text();
+                    showResult('scanResult', error, 'danger');
+                }
+            } catch (error) {
+                showResult('scanResult', 'Error scanning product', 'danger');
+            }
+        }
+        
+        function showProductInfo(elementId, product) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="product-info">
+                    <h4>${product.name}</h4>
+                    <p><strong>Barcode:</strong> ${product.barcode}</p>
+                    <p><strong>Price:</strong> TSh ${product.sellingPrice}</p>
+                    <p><strong>Stock:</strong> ${product.stockQuantity}</p>
+                    <p><strong>Category:</strong> ${product.category ? product.category.name : 'N/A'}</p>
+                    ${product.expiryDate ? `<p><strong>Expiry:</strong> ${product.expiryDate}</p>` : ''}
+                    ${product.isExpired ? '<p style="color: red;"><strong>EXPIRED</strong></p>' : ''}
+                </div>
+            `;
+        }
+        
+        function addToCart() {
+            const barcode = document.getElementById('saleBarcode').value.trim();
+            const quantity = parseInt(document.getElementById('saleQuantity').value);
+            
+            if (!barcode || !quantity || quantity < 1) {
+                showResult('saleResult', 'Please enter valid barcode and quantity', 'danger');
+                return;
+            }
+            
+            cart.push({ barcode, quantity });
+            updateCartDisplay();
+            
+            document.getElementById('saleBarcode').value = '';
+            document.getElementById('saleQuantity').value = '1';
+        }
+        
+        function updateCartDisplay() {
+            const cartElement = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                cartElement.innerHTML = '<p>Cart is empty</p>';
+                return;
+            }
+            
+            let html = '<h4>Cart Items:</h4><ul>';
+            cart.forEach((item, index) => {
+                html += `<li>${item.barcode} - Quantity: ${item.quantity} <button onclick="removeFromCart(${index})">Remove</button></li>`;
+            });
+            html += '</ul>';
+            cartElement.innerHTML = html;
+        }
+        
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+        }
+        
+        async function completeSale() {
+            if (cart.length === 0) {
+                showResult('saleResult', 'Cart is empty', 'danger');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/pos/sale', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: cart,
+                        cashierUsername: currentCashier
+                    })
+                });
+                
+                if (response.ok) {
+                    const sale = await response.json();
+                    showResult('saleResult', `Sale completed! Total: TSh ${sale.totalPrice}`, 'success');
+                    cart = [];
+                    updateCartDisplay();
+                    loadDashboardData(); // Refresh dashboard
+                } else {
+                    const error = await response.text();
+                    showResult('saleResult', error, 'danger');
+                }
+            } catch (error) {
+                showResult('saleResult', 'Error processing sale', 'danger');
+            }
+        }
+        
+        async function loadInventoryAlerts() {
+            try {
+                const response = await fetch('/api/inventory/alerts');
+                const data = await response.json();
+                
+                const alertsElement = document.getElementById('inventoryAlerts');
+                let html = '';
+                
+                if (data.expiringSoonCount > 0) {
+                    html += `<div class="alert alert-warning">⚠️ ${data.expiringSoonCount} products expiring soon</div>`;
+                }
+                
+                if (data.expiredCount > 0) {
+                    html += `<div class="alert alert-danger">🚫 ${data.expiredCount} expired products</div>`;
+                }
+                
+                if (data.lowStockCount > 0) {
+                    html += `<div class="alert alert-warning">📦 ${data.lowStockCount} low stock items</div>`;
+                }
+                
+                if (html === '') {
+                    html = '<p>No inventory alerts</p>';
+                }
+                
+                alertsElement.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading inventory alerts:', error);
+            }
+        }
+        
+        async function loadReport(type) {
+            const reportElement = document.getElementById('reportContent');
+            reportElement.innerHTML = '<div class="loading">Loading report...</div>';
+            
+            try {
+                let url;
+                switch(type) {
+                    case 'daily':
+                    case 'monthly':
+                        url = `/api/reports/revenue/${type}`;
+                        break;
+                    case 'wastage':
+                        url = '/api/reports/wastage';
+                        break;
+                    case 'lowstock':
+                        url = '/api/reports/low-stock';
+                        break;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                displayReport(data, type);
+            } catch (error) {
+                reportElement.innerHTML = '<div class="alert alert-danger">Error loading report</div>';
+            }
+        }
+        
+        function displayReport(data, type) {
+            const reportElement = document.getElementById('reportContent');
+            let html = '';
+            
+            switch(type) {
+                case 'daily':
+                case 'monthly':
+                    html = `
+                        <h3>${type.charAt(0).toUpperCase() + type.slice(1)} Revenue Report</h3>
+                        <p><strong>Total Revenue:</strong> TSh ${data.totalRevenue ? data.totalRevenue.toFixed(2) : '0.00'}</p>
+                        <p><strong>Total Sales:</strong> ${data.totalSales || 0}</p>
+                        <p><strong>Average Sale Value:</strong> TSh ${data.averageSaleValue ? data.averageSaleValue.toFixed(2) : '0.00'}</p>
+                    `;
+                    break;
+                case 'wastage':
+                    html = `
+                        <h3>Wastage Report</h3>
+                        <p><strong>Total Wastage Value:</strong> TSh ${data.totalWastageValue ? data.totalWastageValue.toFixed(2) : '0.00'}</p>
+                        <p><strong>Expired Products Count:</strong> ${data.expiredProductCount || 0}</p>
+                        <p><strong>Net Loss:</strong> TSh ${data.netLoss ? data.netLoss.toFixed(2) : '0.00'}</p>
+                    `;
+                    break;
+                case 'lowstock':
+                    html = `
+                        <h3>Low Stock Report (Threshold: ${data.threshold})</h3>
+                        <p><strong>Low Stock Items:</strong> ${data.lowStockCount || 0}</p>
+                        ${data.lowStockProducts && data.lowStockProducts.length > 0 ? `
+                            <table>
+                                <thead>
+                                    <tr><th>Product</th><th>Barcode</th><th>Stock</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${data.lowStockProducts.map(p => `
+                                        <tr>
+                                            <td>${p.name}</td>
+                                            <td>${p.barcode}</td>
+                                            <td>${p.stockQuantity}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        ` : ''}
+                    `;
+                    break;
+            }
+            
+            reportElement.innerHTML = html;
+        }
+        
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+        
+        // Handle Enter key in barcode input
+        document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                scanProduct();
+            }
+        });
+    </script>
+</body>
+</html>
+

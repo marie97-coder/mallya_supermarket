@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .home-topbar {
+            background: #ffffff;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .home-topbar-inner {
+            max-width: 1100px;
+            margin: auto;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-topbar-logo {
+            background: #0d6efd;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .home-topbar-links a {
+            margin-left: 16px;
+            color: #6b6b6b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .home-topbar-links a:hover {
+            color: #1f1f1f;
+        }
+        body { background: #f5f7fb; }
+        .nav-link.active {
+            font-weight: 600;
+            color: #fff !important;
+            text-decoration: underline;
+            text-underline-offset: 0.35rem;
+        }
+    </style>
+</head>
+<body>
+<header class="home-topbar">
+    <div class="home-topbar-inner">
+        <a class="home-topbar-logo" href="/">MALLYA</a>
+        <nav class="home-topbar-links">
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+        </nav>
+    </div>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid px-lg-4">
+        <a class="navbar-brand fw-semibold" href="/admin/dashboard">
+            <i class="bi bi-shop me-2"></i>Sales Management
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav" aria-controls="adminNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'products'} ? ' active'" href="/admin/products">View Products</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'add-product'} ? ' active'" href="/admin/products/new">Add Product</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'sales'} ? ' active'" href="/admin/sales">View Sales</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/record-sale">Record Sale</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'reports'} ? ' active'" href="/admin/reports">Report</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'add-employee'} ? ' active'" href="/admin/employees/new">Add Employee</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'employees'} ? ' active'" href="/admin/employees">View Employee</a></li>
+            </ul>
+            <form th:action="@{/logout}" method="post" class="mb-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="mb-0"><i class="bi bi-box-seam me-2"></i>Current Products</h2>
+                <button class="btn btn-info" type="button" onclick="loadProducts()">
+                    <i class="bi bi-arrow-repeat me-1"></i>Refresh Products
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-success">
+                    <tr>
+                        <th>ID</th>
+                        <th>Barcode</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Cost</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Expiry</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="rows">
+                    <tr><td colspan="9">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="msg" class="mt-3"></div>
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form id="editProductForm">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input id="edit-id" type="hidden">
+                    <div id="edit-product-msg" class="mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit-barcode" class="form-label">Barcode</label>
+                            <input id="edit-barcode" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit-name" class="form-label">Product Name</label>
+                            <input id="edit-name" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="edit-description" class="form-label">Description</label>
+                            <textarea id="edit-description" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit-category" class="form-label">Category</label>
+                            <input id="edit-category" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit-expiry" class="form-label">Expiry Date</label>
+                            <input id="edit-expiry" type="date" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit-cost-price" class="form-label">Cost Price (TZS)</label>
+                            <input id="edit-cost-price" type="number" step="0.01" min="0.01" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit-selling-price" class="form-label">Selling Price (TZS)</label>
+                            <input id="edit-selling-price" type="number" step="0.01" min="0.01" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit-stock" class="form-label">Stock Quantity</label>
+                            <input id="edit-stock" type="number" min="0" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Update Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const productCache = new Map();
+    let editProductModal;
+
+    function showMessage(text, ok) {
+        const msg = document.getElementById("msg");
+        msg.innerHTML = `<div class="alert ${ok ? "alert-success" : "alert-danger"} mb-0">${text}</div>`;
+    }
+
+    function showEditMessage(text, ok) {
+        const msg = document.getElementById("edit-product-msg");
+        if (!text) {
+            msg.innerHTML = "";
+            return;
+        }
+        msg.innerHTML = `<div class="alert ${ok ? "alert-success" : "alert-danger"} mb-0">${text}</div>`;
+    }
+
+    async function parseResponse(response) {
+        const type = response.headers.get("content-type") || "";
+        if (type.includes("application/json")) return response.json();
+        return response.text();
+    }
+
+    function money(value) {
+        const number = Number(value || 0);
+        return "TSh " + number.toFixed(2);
+    }
+
+    function safeDate(dateValue) {
+        if (!dateValue) return "-";
+        return String(dateValue).slice(0, 10);
+    }
+
+    async function loadProducts() {
+        try {
+            const response = await fetch("/api/admin/products");
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof data === "string" ? data : "Failed to load products");
+
+            productCache.clear();
+
+            const rows = document.getElementById("rows");
+            if (!Array.isArray(data) || data.length === 0) {
+                rows.innerHTML = "<tr><td colspan='9'>No products found</td></tr>";
+                return;
+            }
+
+            rows.innerHTML = data.map(product => {
+                productCache.set(product.id, product);
+                return `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td>${product.barcode}</td>
+                        <td>${product.name}</td>
+                        <td>${product.category || "-"}</td>
+                        <td>${money(product.costPrice)}</td>
+                        <td>${money(product.sellingPrice)}</td>
+                        <td>${product.stockQuantity}</td>
+                        <td>${safeDate(product.expiryDate)}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary" type="button" onclick="openEditProduct(${product.id})">
+                                    <i class="bi bi-pencil-square me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" type="button" onclick="deleteProduct(${product.id})">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        } catch (error) {
+            showMessage(error.message, false);
+        }
+    }
+
+    function openEditProduct(productId) {
+        const product = productCache.get(productId);
+        if (!product) {
+            showMessage("Failed to load selected product", false);
+            return;
+        }
+
+        showEditMessage("", true);
+
+        document.getElementById("edit-id").value = product.id;
+        document.getElementById("edit-barcode").value = product.barcode || "";
+        document.getElementById("edit-name").value = product.name || "";
+        document.getElementById("edit-description").value = product.description || "";
+        document.getElementById("edit-category").value = product.category || "";
+        document.getElementById("edit-cost-price").value = Number(product.costPrice || 0);
+        document.getElementById("edit-selling-price").value = Number(product.sellingPrice || 0);
+        document.getElementById("edit-stock").value = Number(product.stockQuantity || 0);
+        document.getElementById("edit-expiry").value = product.expiryDate ? String(product.expiryDate).slice(0, 10) : "";
+
+        if (editProductModal) {
+            editProductModal.show();
+        } else {
+            showMessage("Update dialog failed to initialize. Please refresh page.", false);
+        }
+    }
+
+    async function submitProductUpdate(event) {
+        event.preventDefault();
+
+        const id = Number(document.getElementById("edit-id").value);
+        const payload = {
+            barcode: document.getElementById("edit-barcode").value.trim(),
+            name: document.getElementById("edit-name").value.trim(),
+            description: document.getElementById("edit-description").value.trim(),
+            categoryName: document.getElementById("edit-category").value.trim(),
+            costPrice: Number(document.getElementById("edit-cost-price").value),
+            sellingPrice: Number(document.getElementById("edit-selling-price").value),
+            stockQuantity: Number(document.getElementById("edit-stock").value),
+            expiryDate: document.getElementById("edit-expiry").value
+        };
+
+        if (!payload.barcode || !payload.name || !payload.categoryName) {
+            showEditMessage("Barcode, Name and Category are required", false);
+            return;
+        }
+        if (!(payload.costPrice > 0) || !(payload.sellingPrice > 0)) {
+            showEditMessage("Cost price and Selling price must be greater than 0", false);
+            return;
+        }
+        if (payload.stockQuantity < 0) {
+            showEditMessage("Stock quantity cannot be negative", false);
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/admin/products/" + id, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof data === "string" ? data : "Failed to update product");
+
+            showEditMessage("Updated successfully", true);
+            if (editProductModal) {
+                editProductModal.hide();
+            }
+            showMessage("Product updated successfully", true);
+            await loadProducts();
+        } catch (error) {
+            showEditMessage(error.message, false);
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm("Delete this product?")) return;
+        try {
+            const response = await fetch("/api/admin/products/" + id, { method: "DELETE" });
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof data === "string" ? data : "Failed to delete product");
+
+            showMessage("Product deleted", true);
+            await loadProducts();
+        } catch (error) {
+            showMessage(error.message, false);
+        }
+    }
+
+    window.onload = function () {
+        if (window.bootstrap && bootstrap.Modal) {
+            editProductModal = new bootstrap.Modal(document.getElementById("editProductModal"));
+        } else {
+            editProductModal = null;
+        }
+        document.getElementById("editProductForm").addEventListener("submit", submitProductUpdate);
+        loadProducts();
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .home-topbar {
+            background: #ffffff;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .home-topbar-inner {
+            max-width: 1100px;
+            margin: auto;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .home-topbar-logo {
+            background: #0d6efd;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            line-height: 1;
+        }
+
+        .home-topbar-links a {
+            margin-left: 16px;
+            color: #6b6b6b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .home-topbar-links a:hover {
+            color: #1f1f1f;
+        }
+        body { background: #f5f7fb; }
+        .nav-link.active {
+            font-weight: 600;
+            color: #fff !important;
+            text-decoration: underline;
+            text-underline-offset: 0.35rem;
+        }
+    </style>
+</head>
+<body>
+<header class="home-topbar">
+    <div class="home-topbar-inner">
+        <a class="home-topbar-logo" href="/">MALLYA</a>
+        <nav class="home-topbar-links">
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+        </nav>
+    </div>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid px-lg-4">
+        <a class="navbar-brand fw-semibold" href="/admin/dashboard">
+            <i class="bi bi-shop me-2"></i>Mallya Supermarket Management
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav" aria-controls="adminNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'products'} ? ' active'" href="/admin/products">View Products</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'add-product'} ? ' active'" href="/admin/products/new">Add Product</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'sales'} ? ' active'" href="/admin/sales">View Sales</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/record-sale">Record Sale</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'reports'} ? ' active'" href="/admin/reports">Report</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'add-employee'} ? ' active'" href="/admin/employees/new">Add Employee</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'employees'} ? ' active'" href="/admin/employees">View Employee</a></li>
+            </ul>
+            <form th:action="@{/logout}" method="post" class="mb-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h2 class="card-title mb-3"><i class="bi bi-person-plus me-2"></i>Add New Employee</h2>
+            <p class="text-muted mb-4" th:text="'Logged in as ' + ${username}">Logged in as admin</p>
+
+            <form id="employeeForm" class="row g-3">
+                <div class="col-md-6">
+                    <label for="username" class="form-label">Cashier Username</label>
+                    <input id="username" type="text" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="password" type="password" class="form-control" minlength="6" required>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-danger" type="submit">
+                        <i class="bi bi-plus-circle me-1"></i>Register Employee
+                    </button>
+                </div>
+            </form>
+
+            <div id="msg" class="mt-3"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function showMessage(text, ok) {
+        const msg = document.getElementById("msg");
+        msg.innerHTML = `<div class="alert ${ok ? "alert-success" : "alert-danger"} mb-0">${text}</div>`;
+    }
+
+    async function parseResponse(response) {
+        const type = response.headers.get("content-type") || "";
+        if (type.includes("application/json")) return response.json();
+        return response.text();
+    }
+
+    document.getElementById("employeeForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const payload = {
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value
+        };
+
+        try {
+            const response = await fetch("/api/admin/cashiers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(typeof data === "string" ? data : "Failed to register employee");
+
+            showMessage("Employee registered: " + data.username, true);
+            document.getElementById("employeeForm").reset();
+        } catch (error) {
+            showMessage(error.message, false);
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
